@@ -28,11 +28,20 @@
 #include <syslog.h>
 #include <string.h>
 
+extern int __log_level__;
+
 void log_level(int level);
 
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
-#define log(priority, fmt...) ___log(__FILENAME__, __LINE__, priority, fmt)
+/* This is useful. The code in the parameter is not executed when the log level is lower than the set value */
+#define log(priority, fmt...)                          \
+    do {                                               \
+        int pri = LOG_PRI(priority);                   \
+                                                       \
+        if (pri <= __log_level__)                      \
+            ___log(__FILENAME__, __LINE__, pri, fmt);  \
+    } while (0)
 
 #define log_debug(fmt...)     log(LOG_DEBUG, fmt)
 #define log_info(fmt...)      log(LOG_INFO, fmt)

@@ -32,7 +32,7 @@
 
 #include "log.h"
 
-static int level = LOG_ERR;
+int __log_level__ = LOG_ERR;
 static const char *ident;
 
 void (*log_write)(int priority, const char *fmt, va_list ap);
@@ -48,9 +48,9 @@ static const char *prioritynames[] = {
     [LOG_DEBUG] = "debug"
 };
 
-void log_level(int l)
+void log_level(int level)
 {
-    level = l;
+    __log_level__ = level;
 }
 
 void ___log(const char *filename, int line, int priority, const char *fmt, ...)
@@ -60,7 +60,7 @@ void ___log(const char *filename, int line, int priority, const char *fmt, ...)
 
     priority = LOG_PRI(priority);
 
-    if (priority > level)
+    if (priority > __log_level__)
         return;
 
     snprintf(new_fmt, sizeof(new_fmt), "(%s:%d) %s", filename, line, fmt);
