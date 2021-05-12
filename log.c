@@ -53,7 +53,7 @@ void log_level(int l)
     level = l;
 }
 
-void __log(const char *filename, int line, int priority, const char *fmt, ...)
+void ___log(const char *filename, int line, int priority, const char *fmt, ...)
 {
     char new_fmt[256];
     va_list ap;

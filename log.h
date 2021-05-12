@@ -32,14 +32,14 @@ void log_level(int level);
 
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
-#define log(priority, fmt...) __log(__FILENAME__, __LINE__, priority, fmt)
+#define log(priority, fmt...) ___log(__FILENAME__, __LINE__, priority, fmt)
 
 #define log_debug(fmt...)     log(LOG_DEBUG, fmt)
 #define log_info(fmt...)      log(LOG_INFO, fmt)
 #define log_warn(fmt...)      log(LOG_WARNING, fmt)
 #define log_err(fmt...)       log(LOG_ERR, fmt)
 
-void __log(const char *filename, int line, int priority, const char *fmt, ...)
+void ___log(const char *filename, int line, int priority, const char *fmt, ...)
             __attribute__((format(printf, 4, 5)));
 
 #endif
