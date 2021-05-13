@@ -48,7 +48,7 @@ void log_level(int level);
 #define log_warn(fmt...)      log(LOG_WARNING, fmt)
 #define log_err(fmt...)       log(LOG_ERR, fmt)
 
-void ___log(const char *filename, int line, int priority, const char *fmt, ...)
-            __attribute__((format(printf, 4, 5)));
+__attribute__((format(printf, 4, 5)))
+void ___log(const char *filename, int line, int priority, const char *fmt, ...);
 
 #endif
