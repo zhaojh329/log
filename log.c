@@ -32,7 +32,7 @@
 
 #include "log.h"
 
-int __log_level__ = LOG_ERR;
+int __log_level__ = LOG_INFO;
 static const char *ident;
 
 void (*log_write)(int priority, const char *fmt, va_list ap);
