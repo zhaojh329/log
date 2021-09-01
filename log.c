@@ -80,7 +80,7 @@ static inline void log_to_stdout(int priority, const char *fmt, va_list ap)
     localtime_r(&now, &tm);
     strftime(buf, sizeof(buf), "%Y/%m/%d %H:%M:%S", &tm);
 
-    fprintf(stderr, "%s %s ", buf, prioritynames[priority]);
+    fprintf(stderr, "%s %s %s[%d]: ", buf, prioritynames[priority], ident, getpid());
     vfprintf(stderr, fmt, ap);
 }
 
@@ -114,6 +114,6 @@ static void __attribute__((constructor)) init()
     } else {
         log_write = log_to_syslog;
 
-        openlog(ident, 0, LOG_DAEMON);
+        openlog(ident, 0, LOG_DAEMON | LOG_PID);
     }
 }
