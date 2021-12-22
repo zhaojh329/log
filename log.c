@@ -35,7 +35,7 @@
 int __log_level__ = LOG_INFO;
 static const char *ident;
 
-void (*log_write)(int priority, const char *fmt, va_list ap);
+static void (*log_write)(int priority, const char *fmt, va_list ap);
 
 static const char *prioritynames[] = {
     [LOG_EMERG] = "emerg",
