@@ -35,7 +35,7 @@ void log_level(int level);
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
 /* This is useful. The code in the parameter is not executed when the log level is lower than the set value */
-#define log(priority, fmt...)                          \
+#define log_conditional(priority, fmt...)                          \
     do {                                               \
         int pri = LOG_PRI(priority);                   \
                                                        \
@@ -43,10 +43,10 @@ void log_level(int level);
             ___log(__FILENAME__, __LINE__, pri, fmt);  \
     } while (0)
 
-#define log_debug(fmt...)     log(LOG_DEBUG, fmt)
-#define log_info(fmt...)      log(LOG_INFO, fmt)
-#define log_warn(fmt...)      log(LOG_WARNING, fmt)
-#define log_err(fmt...)       log(LOG_ERR, fmt)
+#define log_debug(fmt...)     log_conditional(LOG_DEBUG, fmt)
+#define log_info(fmt...)      log_conditional(LOG_INFO, fmt)
+#define log_warn(fmt...)      log_conditional(LOG_WARNING, fmt)
+#define log_err(fmt...)       log_conditional(LOG_ERR, fmt)
 
 __attribute__((format(printf, 4, 5)))
 void ___log(const char *filename, int line, int priority, const char *fmt, ...);
