@@ -51,4 +51,6 @@ void log_level(int level);
 __attribute__((format(printf, 4, 5)))
 void ___log(const char *filename, int line, int priority, const char *fmt, ...);
 
+void set_log_path(const char *path);
+
 #endif

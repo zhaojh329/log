@@ -34,6 +34,7 @@
 
 int __log_level__ = LOG_INFO;
 static const char *ident;
+static const char *log_path;
 
 static void (*log_write)(int priority, const char *fmt, va_list ap);
 
@@ -53,6 +54,33 @@ void log_level(int level)
     __log_level__ = level;
 }
 
+static void __log_to_file(FILE *fp, int priority, const char *fmt, va_list ap)
+{
+    time_t now;
+    struct tm tm;
+    char buf[32];
+
+    now = time(NULL);
+    localtime_r(&now, &tm);
+    strftime(buf, sizeof(buf), "%Y/%m/%d %H:%M:%S", &tm);
+
+    fprintf(fp, "%s %s %s[%d]: ", buf, prioritynames[priority], ident, getpid());
+    vfprintf(fp, fmt, ap);
+}
+
+static inline void log_to_file(int priority, const char *fmt, va_list ap)
+{
+    FILE *fp;
+
+    fp = fopen(log_path, "a");
+    if (!fp)
+        return;
+
+    __log_to_file(fp, priority, fmt, ap);
+
+    fclose(fp);
+}
+
 void ___log(const char *filename, int line, int priority, const char *fmt, ...)
 {
     char new_fmt[256];
@@ -70,18 +98,19 @@ void ___log(const char *filename, int line, int priority, const char *fmt, ...)
     va_end(ap);
 }
 
+void set_log_path(const char *path)
+{
+    log_path = path;
+
+    if (log_path) {
+        log_write = log_to_file;
+        closelog();
+    }
+}
+
 static inline void log_to_stdout(int priority, const char *fmt, va_list ap)
 {
-    time_t now;
-    struct tm tm;
-    char buf[32];
-
-    now = time(NULL);
-    localtime_r(&now, &tm);
-    strftime(buf, sizeof(buf), "%Y/%m/%d %H:%M:%S", &tm);
-
-    fprintf(stderr, "%s %s %s[%d]: ", buf, prioritynames[priority], ident, getpid());
-    vfprintf(stderr, fmt, ap);
+    __log_to_file(stdout, priority, fmt, ap);
 }
 
 static inline void log_to_syslog(int priority, const char *fmt, va_list ap)
