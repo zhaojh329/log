@@ -64,7 +64,7 @@ static void __log_to_file(FILE *fp, int priority, const char *fmt, va_list ap)
     localtime_r(&now, &tm);
     strftime(buf, sizeof(buf), "%Y/%m/%d %H:%M:%S", &tm);
 
-    fprintf(fp, "%s %s %s[%d]: ", buf, prioritynames[priority], ident, getpid());
+    fprintf(fp, "%s %-5s %s[%d]: ", buf, prioritynames[priority], ident, getpid());
     vfprintf(fp, fmt, ap);
 }
 
@@ -91,7 +91,7 @@ void ___log(const char *filename, int line, int priority, const char *fmt, ...)
     if (priority > __log_level__)
         return;
 
-    snprintf(new_fmt, sizeof(new_fmt), "(%s:%d) %s", filename, line, fmt);
+    snprintf(new_fmt, sizeof(new_fmt), "(%s:%3d) %s", filename, line, fmt);
 
     va_start(ap, fmt);
     log_write(priority, new_fmt, ap);
