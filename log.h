@@ -25,6 +25,7 @@
 #ifndef __LOG_H
 #define __LOG_H
 
+#include <stdbool.h>
 #include <syslog.h>
 #include <string.h>
 
@@ -55,5 +56,6 @@ static inline void set_log_level(int level)
 }
 
 void set_log_path(const char *path);
+void set_log_newline(bool val);
 
 #endif

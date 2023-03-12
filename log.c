@@ -28,13 +28,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <stdbool.h>
 
 #include "log.h"
 
 int __log_level__ = LOG_INFO;
 static const char *ident;
 static const char *log_path;
+static bool add_newline = true;
 
 static void (*log_write)(int priority, const char *fmt, va_list ap);
 
@@ -61,6 +61,9 @@ static void __log_to_file(FILE *fp, int priority, const char *fmt, va_list ap)
 
     fprintf(fp, "%s %-5s %s[%d]: ", buf, prioritynames[priority], ident, getpid());
     vfprintf(fp, fmt, ap);
+
+    if (add_newline)
+        fputc('\n', fp);
 }
 
 static inline void log_to_file(int priority, const char *fmt, va_list ap)
@@ -101,6 +104,11 @@ void set_log_path(const char *path)
         log_write = log_to_file;
         closelog();
     }
+}
+
+void set_log_newline(bool val)
+{
+    add_newline = val;
 }
 
 static inline void log_to_stdout(int priority, const char *fmt, va_list ap)
