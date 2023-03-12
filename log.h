@@ -30,8 +30,6 @@
 
 extern int __log_level__;
 
-void log_level(int level);
-
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
 /* This is useful. The code in the parameter is not executed when the log level is lower than the set value */
@@ -50,6 +48,11 @@ void log_level(int level);
 
 __attribute__((format(printf, 4, 5)))
 void ___log(const char *filename, int line, int priority, const char *fmt, ...);
+
+static inline void set_log_level(int level)
+{
+    __log_level__ = level;
+}
 
 void set_log_path(const char *path);
 

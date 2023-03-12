@@ -49,11 +49,6 @@ static const char *prioritynames[] = {
     [LOG_DEBUG] = "debug"
 };
 
-void log_level(int level)
-{
-    __log_level__ = level;
-}
-
 static void __log_to_file(FILE *fp, int priority, const char *fmt, va_list ap)
 {
     time_t now;
