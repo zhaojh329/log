@@ -13,9 +13,10 @@
 #include "log.h"
 
 int __log_level__ = LOG_INFO;
+int __log_flags__ = LOG_FLAG_LF;
+
 static const char *ident;
 static const char *log_path;
-static bool add_newline = true;
 
 static void (*log_write)(int priority, const char *fmt, va_list ap);
 
@@ -43,7 +44,7 @@ static void __log_to_file(FILE *fp, int priority, const char *fmt, va_list ap)
     fprintf(fp, "%s %-5s %s[%d]: ", buf, prioritynames[priority], ident, getpid());
     vfprintf(fp, fmt, ap);
 
-    if (add_newline)
+    if (__log_flags__ & LOG_FLAG_LF)
         fputc('\n', fp);
 }
 
@@ -70,7 +71,13 @@ void ___log(const char *filename, int line, int priority, const char *fmt, ...)
     if (priority > __log_level__)
         return;
 
-    snprintf(new_fmt, sizeof(new_fmt), "(%s:%3d) %s", filename, line, fmt);
+    if (__log_flags__ & LOG_FLAG_FILE || __log_flags__ & LOG_FLAG_PATH) {
+        if (!(__log_flags__ & LOG_FLAG_PATH))
+            filename = basename(filename);
+        snprintf(new_fmt, sizeof(new_fmt), "(%s:%3d) %s", filename, line, fmt);
+    } else {
+        snprintf(new_fmt, sizeof(new_fmt), "%s", fmt);
+    }
 
     va_start(ap, fmt);
     log_write(priority, new_fmt, ap);
@@ -87,9 +94,9 @@ void set_log_path(const char *path)
     }
 }
 
-void set_log_newline(bool val)
+void set_log_flags(int flags)
 {
-    add_newline = val;
+    __log_flags__ = flags;
 }
 
 static inline void log_to_stdout(int priority, const char *fmt, va_list ap)

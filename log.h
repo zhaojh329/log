@@ -10,7 +10,14 @@
 #include <syslog.h>
 #include <string.h>
 
+enum {
+    LOG_FLAG_LF   = 1 << 0, /* append a character '\n' to every log message */
+    LOG_FLAG_FILE = 1 << 1, /* filename and line number */
+    LOG_FLAG_PATH = 1 << 2  /* full file path and line number */
+};
+
 extern int __log_level__;
+extern int __log_flags__;
 
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
@@ -37,6 +44,6 @@ static inline void set_log_level(int level)
 }
 
 void set_log_path(const char *path);
-void set_log_newline(bool val);
+void set_log_flags(int flags);
 
 #endif
