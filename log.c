@@ -134,6 +134,6 @@ static void __attribute__((constructor)) init()
     } else {
         log_write = log_to_syslog;
 
-        openlog(ident, 0, LOG_DAEMON | LOG_PID);
+        openlog(ident, LOG_PID, LOG_DAEMON);
     }
 }
