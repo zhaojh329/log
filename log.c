@@ -15,8 +15,8 @@
 int __log_level__ = LOG_INFO;
 int __log_flags__ = LOG_FLAG_LF;
 
-static const char *ident;
 static const char *log_path;
+static char ident[32];
 
 static void (*log_write)(int priority, const char *fmt, va_list ap);
 
@@ -84,6 +84,11 @@ void ___log(const char *filename, int line, int priority, const char *fmt, ...)
     va_end(ap);
 }
 
+void set_log_ident(const char *val)
+{
+    strncpy(ident, val, sizeof(ident) - 1);
+}
+
 void set_log_path(const char *path)
 {
     log_path = path;
@@ -127,7 +132,7 @@ static void __attribute__((constructor)) init()
         fclose(self);
     }
 
-    ident = p;
+    strncpy(ident, p, sizeof(ident) - 1);
 
     if (isatty(STDOUT_FILENO)) {
         log_write = log_to_stdout;

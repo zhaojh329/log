@@ -43,6 +43,7 @@ static inline void set_log_level(int level)
     __log_level__ = level;
 }
 
+void set_log_ident(const char *val);
 void set_log_path(const char *path);
 void set_log_flags(int flags);
 
