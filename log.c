@@ -95,21 +95,6 @@ void set_log_ident(const char *val)
     openlog(ident, LOG_PID, LOG_DAEMON);
 }
 
-void set_log_path(const char *path)
-{
-    log_path = path;
-
-    if (log_path) {
-        log_write = log_to_file;
-        closelog();
-    }
-}
-
-void set_log_flags(int flags)
-{
-    __log_flags__ = flags;
-}
-
 static inline void log_to_stdout(int priority, const char *fmt, va_list ap)
 {
     __log_to_file(stdout, priority, fmt, ap);
@@ -118,6 +103,37 @@ static inline void log_to_stdout(int priority, const char *fmt, va_list ap)
 static inline void log_to_syslog(int priority, const char *fmt, va_list ap)
 {
     vsyslog(priority, fmt, ap);
+}
+
+static void init_log_write()
+{
+    if (isatty(STDOUT_FILENO)) {
+        log_write = log_to_stdout;
+    } else {
+        log_write = log_to_syslog;
+
+        openlog(ident, LOG_PID, LOG_DAEMON);
+    }
+}
+
+void set_log_path(const char *path)
+{
+    log_path = path;
+
+    if (!log_path || !log_path[0]) {
+        init_log_write();
+        return;
+    }
+
+    log_write = log_to_file;
+
+    if (!isatty(STDOUT_FILENO))
+        closelog();
+}
+
+void set_log_flags(int flags)
+{
+    __log_flags__ = flags;
 }
 
 static void __attribute__((constructor)) init()
@@ -140,11 +156,5 @@ static void __attribute__((constructor)) init()
 
     strncpy(ident, p, sizeof(ident) - 1);
 
-    if (isatty(STDOUT_FILENO)) {
-        log_write = log_to_stdout;
-    } else {
-        log_write = log_to_syslog;
-
-        openlog(ident, LOG_PID, LOG_DAEMON);
-    }
+    init_log_write();
 }
