@@ -87,6 +87,12 @@ void ___log(const char *filename, int line, int priority, const char *fmt, ...)
 void set_log_ident(const char *val)
 {
     strncpy(ident, val, sizeof(ident) - 1);
+
+    if (isatty(STDOUT_FILENO))
+        return;
+
+    closelog();
+    openlog(ident, LOG_PID, LOG_DAEMON);
 }
 
 void set_log_path(const char *path)
