@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <libgen.h>
 
 #include "log.h"
 
@@ -65,6 +66,7 @@ void ___log(const char *filename, int line, int priority, const char *fmt, ...)
 {
     char new_fmt[256];
     va_list ap;
+    char *dirc = NULL;
 
     priority = LOG_PRI(priority);
 
@@ -72,9 +74,13 @@ void ___log(const char *filename, int line, int priority, const char *fmt, ...)
         return;
 
     if (__log_flags__ & LOG_FLAG_FILE || __log_flags__ & LOG_FLAG_PATH) {
-        if (!(__log_flags__ & LOG_FLAG_PATH))
-            filename = basename(filename);
+        if (!(__log_flags__ & LOG_FLAG_PATH)) {
+            dirc = strdup(filename);
+            filename = basename(dirc);
+        }
         snprintf(new_fmt, sizeof(new_fmt), "(%s:%3d) %s", filename, line, fmt);
+        if (!(__log_flags__ & LOG_FLAG_PATH))
+            free(dirc);
     } else {
         snprintf(new_fmt, sizeof(new_fmt), "%s", fmt);
     }
