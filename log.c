@@ -16,7 +16,7 @@
 int __log_level__ = LOG_INFO;
 int __log_flags__ = LOG_FLAG_LF;
 
-static const char *log_path;
+static char *log_path;
 static char ident[32];
 
 static void (*log_write)(int priority, const char *fmt, va_list ap);
@@ -124,7 +124,13 @@ static void init_log_write()
 
 void set_log_path(const char *path)
 {
-    log_path = path;
+    if (log_path)
+        free(log_path);
+
+    if (path)
+        log_path = strdup(path);
+    else
+        log_path = NULL;
 
     if (!log_path || !log_path[0]) {
         init_log_write();
