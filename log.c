@@ -92,7 +92,10 @@ void ___log(const char *filename, int line, int priority, const char *fmt, ...)
 
 void set_log_ident(const char *val)
 {
-    strncpy(ident, val, sizeof(ident) - 1);
+    if (!val)
+        val = "";
+
+    snprintf(ident, sizeof(ident), "%s", val);
 
     if (isatty(STDOUT_FILENO))
         return;
@@ -152,21 +155,25 @@ static void __attribute__((constructor)) init()
 {
     static char line[64];
     FILE *self;
-    char *p = NULL;
+    const char *p = "";
     char *sbuf;
 
     if ((self = fopen("/proc/self/status", "r")) != NULL) {
         while (fgets(line, sizeof(line), self)) {
             if (!strncmp(line, "Name:", 5)) {
                 strtok_r(line, "\t\n", &sbuf);
-                p = strtok_r(NULL, "\t\n", &sbuf);
+                {
+                    char *name = strtok_r(NULL, "\t\n", &sbuf);
+                    if (name && name[0])
+                        p = name;
+                }
                 break;
             }
         }
         fclose(self);
     }
 
-    strncpy(ident, p, sizeof(ident) - 1);
+    snprintf(ident, sizeof(ident), "%s", p);
 
     init_log_write();
 }
