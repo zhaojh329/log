@@ -44,7 +44,15 @@ static inline void set_log_level(int level)
 }
 
 void set_log_ident(const char *val);
-void set_log_path(const char *path);
 void set_log_flags(int flags);
+
+/* Set log file path. Returns 0 on success, -1 on failure. */
+int set_log_path(const char *path);
+
+/* Set max file size in bytes. 0 disables log rolling. Default is 100KB. */
+void set_log_roll_size(size_t size);
+
+/* Set max number of rolled files to keep. Default is 10. */
+void set_log_roll_count(int count);
 
 #endif
