@@ -17,6 +17,7 @@
 #include <libgen.h>
 #include <limits.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include "log.h"
 
@@ -199,6 +200,69 @@ static void cleanup_rolled_files()
     }
 }
 
+static bool copy_log_to_roll(const char *rolled_path)
+{
+    char buf[8192];
+    FILE *src = NULL;
+    FILE *dst = NULL;
+    struct stat st;
+    bool ok = false;
+    int dst_fd = -1;
+
+    if (stat(log_path, &st) < 0 || !S_ISREG(st.st_mode))
+        return false;
+
+    src = fopen(log_path, "rb");
+    if (!src)
+        return false;
+
+    dst_fd = open(rolled_path, O_WRONLY | O_CREAT | O_EXCL, st.st_mode & 0777);
+    if (dst_fd < 0)
+        goto out;
+
+    dst = fdopen(dst_fd, "wb");
+    if (!dst) {
+        close(dst_fd);
+        dst_fd = -1;
+        goto out;
+    }
+    dst_fd = -1;
+
+    while (1) {
+        size_t n = fread(buf, 1, sizeof(buf), src);
+
+        if (n > 0 && fwrite(buf, 1, n, dst) != n)
+            goto out;
+
+        if (n < sizeof(buf)) {
+            if (ferror(src))
+                goto out;
+            break;
+        }
+    }
+
+    if (fflush(dst))
+        goto out;
+
+    ok = true;
+
+out:
+    if (src && fclose(src))
+        ok = false;
+
+    if (dst) {
+        if (fclose(dst))
+            ok = false;
+    } else if (dst_fd >= 0) {
+        close(dst_fd);
+    }
+
+    if (!ok)
+        unlink(rolled_path);
+
+    return ok;
+}
+
 static void rotate_log(void)
 {
     char rolled_path[PATH_MAX];
@@ -224,8 +288,13 @@ static void rotate_log(void)
     if (snprintf(rolled_path, sizeof(rolled_path), "%s.%s.%s", log_path, seq_buf, ts) >= sizeof(rolled_path))
         return;
 
-    if (rename(log_path, rolled_path))
+    if (!copy_log_to_roll(rolled_path))
         return;
+
+    if (truncate(log_path, 0)) {
+        unlink(rolled_path);
+        return;
+    }
 
     cleanup_rolled_files();
 }
